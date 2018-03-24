@@ -1,0 +1,14 @@
+<?xml></>
+
+<DataModel name = "template">
+	<String name = "key" />
+	<String value= ':' token ="true"/>
+</DataModel>
+
+<DataModel name="Customized" ref="template">
+	<String name = "key" value = "Content-Length"/>
+	<String name= "value">
+		<Relation type="size" of="HttpBody"/>
+	</String>
+	<Blob name = "HttpBody"/>
+</DataModel>
