@@ -49,8 +49,8 @@ def main(argv):
         tcp.connect((host, int(port)))
         print "Connected"
     except socket.error:
-            print "Couldn't connect to Server:" + host + ":" + port
-            sys.exit(2)
+        print "Couldn't connect to Server:" + host + ":" + port
+        sys.exit(2)
     
     while(True):
         try:
@@ -58,7 +58,6 @@ def main(argv):
             dataSent = tcp.send(random)
             print "sent"
             time.sleep(5)
-            
         except socket.error:
             print "Connection lost..."
                 break

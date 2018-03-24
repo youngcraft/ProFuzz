@@ -70,9 +70,11 @@ def fuzzer(packetList, interface):
     answered = list()
     unanswered = list()
     
+    # 循环发包获取发包结果
     for packet in packetList:
         responses.append(srp(packet, timeout=1))
     
+    # 0 表示1响应，1表示未响应
     for response in responses:
         answered.append(response[0])
         unanswered.append(response[1])
