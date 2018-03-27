@@ -22,6 +22,7 @@
 from scapy.packet import *
 from scapy.fields import *
 from scapy.layers.inet import *
+from scapy.all import *
 
 # TODO: implement serial specific function codes
 

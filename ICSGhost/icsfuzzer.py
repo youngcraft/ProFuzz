@@ -16,7 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with ProFuzz.  If not, see <http://www.gnu.org/licenses/>.
 
-# Authors: Thomas Young / Devil hex
+# Authors: Thomas Young
+
+class fuzzer():
+
+	def __init__(self):
+		self.name = "base_fuzzer"
+
+class modbus(fuzzer):
+
+	def __init__(self):
+		super(modbus, self).__init__()
+		self.name = "modbus"
+
+
+
 
 
 
