@@ -38,6 +38,7 @@ class monitor():
 		p = Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=self.target_ip)
 		ans ,unans= srp(p)
 		ans.summary(lambda (s, r): r.sprintf("%Ether.src% %ARP.psrc%"))
+		print p
 
 	def ICMP_test(self):
 		pass
