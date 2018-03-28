@@ -3,11 +3,11 @@
 
 import sys
 import socket
-import pymongo
 from scapy import *
 from scapy.all import *
 from PacketsGenerator import *
 from optparse import OptionParser
+
 
 class monitor():
 
@@ -17,6 +17,9 @@ class monitor():
 		self.target_ip = target_ip
 		self.target_port = target_port
 		self.checker = checker
+		# get local ip
+		self.local_ip = socket.gethostbyname(socket.gethostbyname())
+
 
 	def _heartbeat(self, checker,):
 		pass
@@ -35,16 +38,26 @@ class monitor():
 			ans,unans = srp(send_line)
 
 	def ARP_test(self):
-		p = Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=self.target_ip)
-		ans ,unans= srp(p)
-		ans.summary(lambda (s, r): r.sprintf("%Ether.src% %ARP.psrc%"))
-		print p
+		ans ,unans= srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=self.target_ip))
+		ans.summary(lambda (s, r): r.sprintf("Recv data from (%Ether.src% %ARP.psrc%)"))
 
 	def ICMP_test(self):
-		pass
+		ans,unans = sr(IP(dst=self.target_ip)/ICMP()/"hellp plc")
+		ans.summary(lambda (s, r): r.sprintf("Recv data from (%Ether.src% %ARP.psrc%)"))
 
 	def TCP_test(self):
-		pass
+		try :
+			sport = random.randint(1024, 65535)
+			# SYN
+			ip = IP(dst=self.target_ip)
+			SYN = TCP(sport=sport, dport=443, flags='S', seq=1000)
+			SYNACK = sr1(ip / SYN)
+			# ACK
+			my_ack = SYNACK.seq + 1
+			ACK = TCP(sport=sport, dport=443, flags='A', seq=1001, ack=my_ack)
+			send(ip / ACK)
+		except Exception as e:
+			print e
 
 	def UDP_test(self):
 		pass
