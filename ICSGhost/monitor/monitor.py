@@ -5,11 +5,11 @@ import sys
 import socket
 import pymongo
 from scapy import *
-from scapy.all import Ether,ARP
+from scapy.all import *
 from PacketsGenerator import *
 from optparse import OptionParser
 
-class monitor:
+class monitor():
 
 	def __init__(self,target_ip,target_port,checker):
 		assert type(target_ip) == str
@@ -34,9 +34,10 @@ class monitor:
 			send_line = pkt_dict[line]
 			ans,unans = srp(send_line)
 
-
 	def ARP_test(self):
-		ans,unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=))
+		p = Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=self.target_ip)
+		ans ,unans= srp(p)
+		ans.summary(lambda (s, r): r.sprintf("%Ether.src% %ARP.psrc%"))
 
 	def ICMP_test(self):
 		pass
@@ -104,5 +105,6 @@ class Sniffer():
 
 
 if __name__=="__main__":
-	pass
+	a = monitor(target_ip='192.168.0.1',target_port=80,checker=None)
+	a.ARP_test()
 
