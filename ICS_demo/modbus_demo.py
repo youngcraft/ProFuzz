@@ -21,10 +21,11 @@
 
 from scapy.packet import *
 from scapy.fields import *
+import random
 from scapy.layers.inet import *
 from scapy.all import *
-from ModbusProtocols import *
-
+from ModbusProtocols import ModbusPDU01ReadCoilsRequest,ModbusADURequest
+from time import sleep
 '''
 description: generate the packet of modbus
 
@@ -41,24 +42,72 @@ class ModbusPacketList():
 
 
 	def request_coil_read(self):
+		# IP for all transmissions
+		ip = IP(dst="166.142.203.205")
+		
+		shortlist = [x for x in range(1,65535)]
+		
+		# Sets up the session with a TCP three-way handshake
+		# Send the syn, receive the syn/ack
+		tcp = TCP(flags='S', window=65535, sport=RandShort(), dport=502,
+		          options=[('MSS', 1360), ('NOP', 1), ('NOP', 1), ('SAckOK', '')])
+		synAck = sr1(ip / tcp)
+		#sleep(20)
+		# Send the ack
+		tcp.flags = 'A'
+		tcp.sport = synAck[TCP].dport
+		tcp.seq = synAck[TCP].ack
+		tcp.ack = synAck[TCP].seq + 1
+		tcp.options = ''
+		send(ip / tcp)
+		
+		tcp.flags = 'AP'
+		adu = ModbusADURequest()
+		pdu = ModbusPDU01ReadCoilsRequest()
+		
+		adu.transId = hex(random.choice(shortlist))
+		pdu.startAddr = hex(random.choice(shortlist))
+		pdu.quantity = hex(random.choice(shortlist))
+		adu = adu / pdu
+		tcp = tcp / adu
+		packet = ip / tcp
+		packet.show()
+		data = sr1((ip / tcp), timeout=20)
+		if data:
+			data.show()
+		
 
-		shortlist= [x for x in range(1,65536)]
+		# shortlist= [x for x in range(1,65536)]
 
-		base = ModbusADURequest()
-		read_coil = ModbusPDU01ReadCoilsRequest()
 
-		base.transId = hex(random.choice(shortlist))
-		read_coil.startAddr = hex(random.choice(shortlist))
-		read_coil.quantity = hex(random.choice(shortlist))
-
-		self.packet_list.append(IP(dst=self.target_ip)/TCP(dport=502)/base/read_coid)
-
+		
+		
+		# self.packet_list.append(packet)
+		# print len(self.packet_list)
+	
+	def request_raw_socket(self):
+		import socket
+		shortlist = [x for x in range(1, 65535)]
+		sock = socket.socket()
+		sock.connect(("166.142.203.205", 502))
+		s = StreamSocket(sock)
+		adu = ModbusADURequest()
+		pdu = ModbusPDU01ReadCoilsRequest()
+		
+		adu.transId = 0xff
+		startaddr = hex(random.choice(shortlist))
+		print startaddr
+		print type(startaddr)
+		print type(0xffff)
+		pdu.funcCode = 90
+		pdu.startAddr = 65535
+		pdu.quantity = 0xffff
+		adu = adu / pdu
+		adu.show()
+		ans = s.sr(adu)
+		ans.show()
 
 if __name__ =='__main__':
 	x = ModbusPacketList('166.142.203.205',502)
-	for i in x:
-		ans,unans = sr(i)
-
-		print ans
-		print unans
-
+	packetl = x.request_raw_socket()
+	
